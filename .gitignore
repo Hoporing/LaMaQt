@@ -1,0 +1,20 @@
+build/
+.qtc/
+*.user
+*.user.*
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.autosave
+
+# Qt generated
+moc_*.cpp
+ui_*.h
+qrc_*.cpp
+*.qm
+
+# Model 파일 (용량 큰 Binary)
+*.onnx
+models/SAM_2/*/sam2_*.onnx
+lama.onnx
