@@ -14,7 +14,10 @@ ui_*.h
 qrc_*.cpp
 *.qm
 
+# Claude Code
+.claude/
+
 # Model 파일 (용량 큰 Binary)
+models/
 *.onnx
-models/SAM_2/*/sam2_*.onnx
 lama.onnx
