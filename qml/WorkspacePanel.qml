@@ -676,7 +676,6 @@ Item {
                 TextField {
                     id:              samModelDirField
                     Layout.fillWidth: true
-                    placeholderText: "D:/.../models/SAM_2"
                     color:           Theme.textPrimary
                     font.family:     Theme.fontFamily
                     font.pixelSize:  Theme.fontSizeSmall
@@ -690,6 +689,16 @@ Item {
                     }
 
                     onTextChanged: appSettings.samModelDir = text
+                }
+
+                StyledButton {
+                    text:        "..."
+                    compact:     true
+                    normalColor: Theme.bgLighter
+                    hoverColor:  Theme.bgLight
+                    pressColor:  Qt.darker(Theme.bgLight, 1.1)
+                    implicitWidth: 36
+                    onClicked:   samBrowseDialog.open()
                 }
 
                 ComboBox {
@@ -797,7 +806,6 @@ Item {
                 TextField {
                     id:              modelPathField
                     Layout.fillWidth: true
-                    placeholderText: "C:/models/lama.onnx"
                     text:            lamaBridge.modelPath
                     color:           Theme.textPrimary
                     font.family:     Theme.fontFamily
@@ -815,6 +823,16 @@ Item {
                         if (text !== lamaBridge.modelPath) lamaBridge.modelPath = text
                         appSettings.lamaModelPath = text
                     }
+                }
+
+                StyledButton {
+                    text:        "..."
+                    compact:     true
+                    normalColor: Theme.bgLighter
+                    hoverColor:  Theme.bgLight
+                    pressColor:  Qt.darker(Theme.bgLight, 1.1)
+                    implicitWidth: 36
+                    onClicked:   lamaBrowseDialog.open()
                 }
 
                 StyledButton {
@@ -900,34 +918,34 @@ Item {
     // ── Persistent settings ───────────────────────────────────────────────────
     Settings {
         id: appSettings
-        property string lamaModelPath:  ""
-        property string samModelDir:    ""
+        property string lamaModelPath:   "D:/CTEC/Project/Qt/LaMaQt/models/LaMa/lama.onnx"
+        property string samModelDir:     "D:/CTEC/Project/Qt/LaMaQt/models/SAM_2"
         property int    samVariantIndex: 1   // Small
     }
 
     // ── Auto-load models on startup ───────────────────────────────────────────
     Component.onCompleted: {
-        // Restore saved paths to text fields
-        if (appSettings.lamaModelPath.length > 0)
-            lamaBridge.modelPath = appSettings.lamaModelPath
+        var lamaPath = appSettings.lamaModelPath
+        var samDir   = appSettings.samModelDir
 
-        if (appSettings.samModelDir.length > 0) {
-            samModelDirField.text          = appSettings.samModelDir
-            samVariantCombo.currentIndex   = appSettings.samVariantIndex
-        }
+        // Restore paths to UI fields
+        if (lamaPath.length > 0)
+            lamaBridge.modelPath = lamaPath
+
+        samModelDirField.text        = samDir
+        samVariantCombo.currentIndex = appSettings.samVariantIndex
 
         // Auto-initialize LaMa
-        if (appSettings.lamaModelPath.length > 0)
-            lamaBridge.initialize(appSettings.lamaModelPath)
+        if (lamaPath.length > 0)
+            lamaBridge.initialize(lamaPath)
 
         // Auto-initialize SAM
-        if (appSettings.samModelDir.length > 0) {
-            var v   = root.samVariants[appSettings.samVariantIndex]
-            var dir = appSettings.samModelDir
+        if (samDir.length > 0) {
+            var v = root.samVariants[appSettings.samVariantIndex]
             samBridge.initialize(
-                        dir + "/" + v.folder + "/sam2_hiera_" + v.fileId + ".encoder.onnx",
-                        dir + "/" + v.folder + "/sam2_hiera_" + v.fileId + ".decoder.onnx"
-                        )
+                samDir + "/" + v.folder + "/sam2_hiera_" + v.fileId + ".encoder.onnx",
+                samDir + "/" + v.folder + "/sam2_hiera_" + v.fileId + ".decoder.onnx"
+            )
         }
     }
 
@@ -990,6 +1008,28 @@ Item {
                 statusText.text  = "Model loaded"
                 statusText.color = Theme.statusReady
             }
+        }
+    }
+
+    // ── LaMa model file picker ────────────────────────────────────────────────
+    FileDialog {
+        id:          lamaBrowseDialog
+        title:       "Select LaMa ONNX Model"
+        fileMode:    FileDialog.OpenFile
+        nameFilters: ["ONNX model (*.onnx)", "All files (*)"]
+        onAccepted: {
+            var path = selectedFile.toString().replace("file:///", "")
+            modelPathField.text = path
+        }
+    }
+
+    // ── SAM model folder picker ───────────────────────────────────────────────
+    FolderDialog {
+        id:    samBrowseDialog
+        title: "Select SAM Model Directory"
+        onAccepted: {
+            var path = selectedFolder.toString().replace("file:///", "")
+            samModelDirField.text = path
         }
     }
 

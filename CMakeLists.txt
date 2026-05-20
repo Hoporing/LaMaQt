@@ -27,8 +27,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # ────────────────────────────────────────────────────────────────────────────
 
 set(CUDA_TOOLKIT_ROOT_DIR  "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v13.1")
-set(ONNXRUNTIME_ROOT       "C:/onnxruntime")
-set(OpenCV_DIR             "C:/OpenCV")    # directory containing OpenCVConfig.cmake
+set(ONNXRUNTIME_ROOT       "C:/onnxruntime-win-x64-gpu-1.24.2")
+set(OpenCV_DIR             "C:/OpenCV_4.13.0")
 set(LIBVLC_ROOT            "C:/libVLC")
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -170,13 +170,13 @@ endif()
 
 # ── libVLC ────────────────────────────────────────────────────────────────────
 find_library(LIBVLC_LIB
-    NAMES vlc libvlc
-    PATHS "${LIBVLC_ROOT}/bin/X64" "${LIBVLC_ROOT}/lib"
+    NAMES libvlc
+    PATHS "${LIBVLC_ROOT}/lib"
     NO_DEFAULT_PATH
 )
 find_library(LIBVLCCORE_LIB
-    NAMES vlccore libvlccore
-    PATHS "${LIBVLC_ROOT}/bin/X64" "${LIBVLC_ROOT}/lib"
+    NAMES libvlccore
+    PATHS "${LIBVLC_ROOT}/lib"
     NO_DEFAULT_PATH
 )
 
@@ -193,7 +193,7 @@ endif()
 
 target_link_libraries(LaMaQt PRIVATE
     Qt6::Core Qt6::Gui Qt6::Quick Qt6::QuickControls2 Qt6::Qml Qt6::Concurrent
-    "$<IF:$<CONFIG:Debug>,${OpenCV_DIR}/lib/opencv_worldd.lib,${OpenCV_DIR}/lib/opencv_world.lib>"
+    "$<IF:$<CONFIG:Debug>,${OpenCV_DIR}/x64/vc17/lib/opencv_world4140d.lib,${OpenCV_DIR}/x64/vc17/lib/opencv_world4140.lib>"
     ${ONNXRUNTIME_LIB}
     ${CUDA_RUNTIME_LIB}
     ${LIBVLC_LIB}
@@ -227,30 +227,45 @@ endif()
 
 add_custom_command(TARGET LaMaQt POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${LIBVLC_ROOT}/bin/X64/libvlc.dll"     $<TARGET_FILE_DIR:LaMaQt>
+        "${LIBVLC_ROOT}/bin/libvlc.dll"     $<TARGET_FILE_DIR:LaMaQt>
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${LIBVLC_ROOT}/bin/X64/libvlccore.dll" $<TARGET_FILE_DIR:LaMaQt>
+        "${LIBVLC_ROOT}/bin/libvlccore.dll" $<TARGET_FILE_DIR:LaMaQt>
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${LIBVLC_ROOT}/bin/X64/plugins"
+        "${LIBVLC_ROOT}/bin/plugins"
         "$<TARGET_FILE_DIR:LaMaQt>/plugins"
     COMMENT "Copying VLC runtime..."
 )
 
 add_custom_command(TARGET LaMaQt POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "$<IF:$<CONFIG:Debug>,${OpenCV_DIR}/bin/opencv_world4140d.dll,${OpenCV_DIR}/bin/opencv_world4140.dll>"
+        "$<IF:$<CONFIG:Debug>,${OpenCV_DIR}/x64/vc17/bin/opencv_world4140d.dll,${OpenCV_DIR}/x64/vc17/bin/opencv_world4140.dll>"
         $<TARGET_FILE_DIR:LaMaQt>
     COMMENT "Copying OpenCV runtime..."
 )
 
 add_custom_command(TARGET LaMaQt POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${ONNXRUNTIME_ROOT}/bin/onnxruntime.dll"                  $<TARGET_FILE_DIR:LaMaQt>
+        "${ONNXRUNTIME_ROOT}/lib/onnxruntime.dll"                  $<TARGET_FILE_DIR:LaMaQt>
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${ONNXRUNTIME_ROOT}/bin/onnxruntime_providers_cuda.dll"   $<TARGET_FILE_DIR:LaMaQt>
+        "${ONNXRUNTIME_ROOT}/lib/onnxruntime_providers_cuda.dll"   $<TARGET_FILE_DIR:LaMaQt>
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${ONNXRUNTIME_ROOT}/bin/onnxruntime_providers_shared.dll" $<TARGET_FILE_DIR:LaMaQt>
+        "${ONNXRUNTIME_ROOT}/lib/onnxruntime_providers_shared.dll" $<TARGET_FILE_DIR:LaMaQt>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${ONNXRUNTIME_ROOT}/lib/onnxruntime_providers_tensorrt.dll" $<TARGET_FILE_DIR:LaMaQt>
     COMMENT "Copying ONNX Runtime runtime DLLs..."
+)
+
+set(CUDNN_BIN_DIR "C:/Program Files/NVIDIA/CUDNN/v9.17/bin/13.1")
+add_custom_command(TARGET LaMaQt POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CUDNN_BIN_DIR}/cudnn64_9.dll"                          $<TARGET_FILE_DIR:LaMaQt>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CUDNN_BIN_DIR}/cudnn_ops64_9.dll"                      $<TARGET_FILE_DIR:LaMaQt>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CUDNN_BIN_DIR}/cudnn_cnn64_9.dll"                      $<TARGET_FILE_DIR:LaMaQt>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CUDNN_BIN_DIR}/cudnn_adv64_9.dll"                      $<TARGET_FILE_DIR:LaMaQt>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CUDNN_BIN_DIR}/cudnn_graph64_9.dll"                    $<TARGET_FILE_DIR:LaMaQt>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CUDNN_BIN_DIR}/cudnn_heuristic64_9.dll"                $<TARGET_FILE_DIR:LaMaQt>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CUDNN_BIN_DIR}/cudnn_engines_precompiled64_9.dll"      $<TARGET_FILE_DIR:LaMaQt>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CUDNN_BIN_DIR}/cudnn_engines_runtime_compiled64_9.dll" $<TARGET_FILE_DIR:LaMaQt>
+    COMMENT "Copying cuDNN runtime DLLs..."
 )
 
 # ── windeployqt ───────────────────────────────────────────────────────────────

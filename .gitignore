@@ -1,23 +1,69 @@
+# ── Build output ──────────────────────────────────────────────────────────────
 build/
-.qtc/
-*.user
-*.user.*
+out/
+cmake-build-*/
+
+# CMake generated files (out-of-tree builds)
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
-Makefile
+install_manifest.txt
+CTestTestfile.cmake
+_deps/
+
+# ── MSVC intermediate files ────────────────────────────────────────────────────
+*.obj
+*.pdb
+*.ilk
+*.exp
+*.idb
+*.vc.db
+*.vc.opendb
+
+# Compiled binaries (DLLs / EXEs covered by build/ above, listed as safety net)
+*.exe
+*.dll
+*.lib
+*.a
+
+# ── AI model files ─────────────────────────────────────────────────────────────
+# LaMa  : lama.onnx (~4.5 MB) + lama.onnx.data (~195 MB)
+# SAM 2 : encoder up to 848 MB, decoder ~20 MB each
+models/
+
+# ── Qt Creator project files ───────────────────────────────────────────────────
+.qtcreator/
+.qtc/
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.user
+*.user.*
+*.user.stash
 *.autosave
 
-# Qt generated
+# Qt generated (MOC / QRC)
 moc_*.cpp
-ui_*.h
 qrc_*.cpp
+ui_*.h
 *.qm
 
-# Claude Code
+# Qt QML compiled cache
+*.qmlc
+*.jsc
+
+# ── Claude Code local settings ─────────────────────────────────────────────────
 .claude/
 
-# Model 파일 (용량 큰 Binary)
-models/
-*.onnx
-lama.onnx
+# ── Windows ───────────────────────────────────────────────────────────────────
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ── Editors / IDE ──────────────────────────────────────────────────────────────
+.vs/
+.vscode/
+*.swp
+*.swo
+*~
